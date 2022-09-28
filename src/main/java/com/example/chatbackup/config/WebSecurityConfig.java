@@ -1,11 +1,9 @@
 package com.example.chatbackup.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -14,13 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.sql.DataSource;
 
-@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-//    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
     private DataSource dataSource;
@@ -29,12 +24,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/","/register", "/css/**", "/images/**").permitAll()
-                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers("/", "/css/**").permitAll()
+                .antMatchers("/").hasRole("USER")
+                //.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .defaultSuccessUrl("/", true)
                 .permitAll()
                 .and()
                 .logout()
@@ -54,14 +51,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         + "where email = ?")
                 // 권한처리(user_role 테이블)
                 .authoritiesByUsernameQuery("select u.email, r.name "
-                        + "from user_role ur inner join user u on user.id = u.id" // 테이블 조인
-                        + "inner join role r on ur.role_id = r.id"
+                        + "from user_role ur inner join user u on ur.user_id = u.id "
+                        + "inner join role r on ur.role_id = r.id "
                         + "where u.email = ?");
     }
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 
 //    private final CustomOAuth2UserService customOAuth2UserService;
@@ -87,7 +86,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .userService(customOAuth2UserService);
 //    }
 }
-
 
 
 
