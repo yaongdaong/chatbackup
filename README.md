@@ -1,10 +1,9 @@
 # chatbackup
 
-# 사용한 것
-spring security
-mariaDB
-thymeleaf
+## 개발환경
+intellij + java + springboot
+spring security + mariaDB + thymeleaf
 
-# 기능
-login
+## 기능
+login - 비밀번호 암호화
 signup
